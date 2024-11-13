@@ -30,29 +30,31 @@ const EncryptionTool = ({ isAuthenticated, setEncryptionKey }) => {
             setMessage('Please select a file to proceed.');
             return;
         }
-
+    
         if (mode === 'decrypt' && !file.name.endsWith('.enc')) {
             setMessage('Error: Please select a file with a .enc extension for decryption.');
             return;
         }
-
+    
         if (mode === 'decrypt' && key.length === 0) {
             setMessage('Please provide a decryption key.');
             return;
         }
-
+    
         const formData = new FormData();
         formData.append('file', file);
         if (mode === 'decrypt') formData.append('key', key);
-
+    
         setLoading(true);
         setUploadProgress(0);
         setDownloadProgress(0);
         setShowModal(true);
-
+    
         try {
             const endpoint = mode === 'encrypt' ? '/api/encrypt/' : '/api/decrypt/';
-            const response = await axios.post(`http://localhost:8000${endpoint}`, formData, {
+            
+            // Use the new backend URL
+            const response = await axios.post(`https://pythonProject-Encryption-Backend.onrender.com${endpoint}`, formData, {
                 responseType: mode === 'decrypt' ? 'blob' : 'json',
                 headers: { 'Content-Type': 'multipart/form-data' },
                 onUploadProgress: (progressEvent) => {
@@ -64,11 +66,11 @@ const EncryptionTool = ({ isAuthenticated, setEncryptionKey }) => {
                     setDownloadProgress(percentCompleted);
                 },
             });
-
+    
             if (mode === 'encrypt') {
                 const { encryption_key, file_name, file } = response.data;
                 setEncryptionKey(encryption_key);
-
+    
                 const blob = new Blob([Uint8Array.from(atob(file), (c) => c.charCodeAt(0))]);
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(blob);
@@ -83,7 +85,7 @@ const EncryptionTool = ({ isAuthenticated, setEncryptionKey }) => {
                     const matches = contentDisposition.match(/filename="?([^";]+)"?/);
                     if (matches && matches[1]) original_filename = matches[1];
                 }
-
+    
                 const blob = response.data;
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(blob);
@@ -92,7 +94,7 @@ const EncryptionTool = ({ isAuthenticated, setEncryptionKey }) => {
                 link.click();
                 link.remove();
             }
-
+    
             setMessage('File processed successfully.');
         } catch (error) {
             console.error('Error processing the file', error.response?.data || error);
@@ -102,6 +104,7 @@ const EncryptionTool = ({ isAuthenticated, setEncryptionKey }) => {
             setShowModal(false);
         }
     };
+    
 
     const handleRefresh = () => window.location.reload();
 

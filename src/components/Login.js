@@ -17,11 +17,13 @@ const Login = ({ setIsAuthenticated }) => {
         setLoading(true); // Show loading spinner
 
         try {
-            const response = await axios.post('http://localhost:8000/api/accounts/login/', {
+            // Update URL to the deployed backend
+            const response = await axios.post('https://pythonProject-Encryption-Backend.onrender.com/api/accounts/login/', {
                 email,
                 password,
             });
 
+            // If login is successful
             setIsAuthenticated(true); // Update state to reflect successful authentication
             localStorage.setItem('isAuthenticated', 'true'); // Persist authentication status
             setLoginSuccess(true); // Set login success state
@@ -29,7 +31,7 @@ const Login = ({ setIsAuthenticated }) => {
             setLoading(false); // Hide loading spinner
             setShowModal(true); // Show success modal
             setTimeout(() => {
-                navigate('/'); // Redirect to the home page or protected route
+                navigate('/'); // Redirect to the home page or protected route after 2 seconds
             }, 2000);
         } catch (error) {
             setErrorMessage('Invalid email or password. Please try again.'); // Show error message
