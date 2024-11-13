@@ -16,9 +16,12 @@ const Register = () => {
         setLoading(true); // Show the loading spinner when the request is being sent
 
         try {
-            const response = await axios.post('http://localhost:8000/api/accounts/register/', formData, {
-                headers: { 'Content-Type': 'application/json' },
-            });
+            // Update the URL to point to the deployed backend
+            const response = await axios.post(
+                'https://pythonProject-Encryption-Backend.onrender.com/api/accounts/register/', 
+                formData, 
+                { headers: { 'Content-Type': 'application/json' } }
+            );
 
             setLoading(false); // Hide the spinner when the request is complete
             setShowModal(true); // Show modal on successful registration
