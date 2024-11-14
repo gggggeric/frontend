@@ -1,35 +1,49 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import './Auth.css'; // Import the CSS file for styling
 
 const Register = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false); // State to control loading spinner
     const [showModal, setShowModal] = useState(false); // State to control the modal visibility
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formData = { username, email, password };
+    // Validation schema with Yup
+    const validationSchema = Yup.object({
+        username: Yup.string()
+            .min(3, 'Username must be at least 3 characters')
+            .max(20, 'Username must be less than 20 characters')
+            .required('Username is required'),
+        email: Yup.string()
+            .email('Invalid email address')
+            .required('Email is required'),
+        password: Yup.string()
+            .min(6, 'Password must be at least 6 characters')
+            .required('Password is required')
+    });
+
+    const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+        const { username, email, password } = values;
 
         setLoading(true); // Show the loading spinner when the request is being sent
 
         try {
             // Update the URL to point to the deployed backend
             const response = await axios.post(
-                'https://pythonProject-Encryption-Backend.onrender.com/api/accounts/register/', 
-                formData, 
+                'https://pythonProject-Encryption-Backend.onrender.com/api/accounts/register/',
+                { username, email, password },
                 { headers: { 'Content-Type': 'application/json' } }
             );
 
             setLoading(false); // Hide the spinner when the request is complete
             setShowModal(true); // Show modal on successful registration
+            resetForm(); // Reset the form fields
         } catch (error) {
             setLoading(false); // Hide the spinner if there's an error
             console.error('There was an error registering!', error);
             alert('Registration failed!');
         }
+        setSubmitting(false);
     };
 
     const closeModal = () => {
@@ -39,32 +53,52 @@ const Register = () => {
     return (
         <div className="auth-container">
             <h2>Register</h2>
-            <form onSubmit={handleSubmit} className="auth-form">
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit" className="auth-button" disabled={loading}>
-                    {loading ? 'Registering...' : 'Register'}
-                </button>
-            </form>
+
+            <Formik
+                initialValues={{
+                    username: '',
+                    email: '',
+                    password: ''
+                }}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmit}
+            >
+                {({ isSubmitting }) => (
+                    <Form className="auth-form">
+                        <Field
+                            type="text"
+                            name="username"
+                            placeholder="Username"
+                            className="auth-input"
+                        />
+                        <ErrorMessage name="username" component="div" className="error-message" />
+
+                        <Field
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            className="auth-input"
+                        />
+                        <ErrorMessage name="email" component="div" className="error-message" />
+
+                        <Field
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            className="auth-input"
+                        />
+                        <ErrorMessage name="password" component="div" className="error-message" />
+
+                        <button
+                            type="submit"
+                            className="auth-button"
+                            disabled={isSubmitting || loading}
+                        >
+                            {loading ? 'Registering...' : 'Register'}
+                        </button>
+                    </Form>
+                )}
+            </Formik>
 
             {/* Show loading spinner while registering */}
             {loading && <div className="loading-spinner"></div>}
@@ -75,7 +109,9 @@ const Register = () => {
                     <div className="modal-content">
                         <p>Registration successful!</p>
                         <div className="modal-buttons">
-                            <button onClick={closeModal}>Close</button>
+                            <button onClick={closeModal} className="modal-close-btn">
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
