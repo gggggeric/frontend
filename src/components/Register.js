@@ -7,6 +7,7 @@ import './Auth.css'; // Import the CSS file for styling
 const Register = () => {
     const [loading, setLoading] = useState(false); // State to control loading spinner
     const [showModal, setShowModal] = useState(false); // State to control the modal visibility
+    const [errorMessage, setErrorMessage] = useState(''); // State to store error message
 
     // Validation schema with Yup
     const validationSchema = Yup.object({
@@ -26,10 +27,11 @@ const Register = () => {
         const { username, email, password } = values;
 
         setLoading(true); // Show the loading spinner when the request is being sent
+        setErrorMessage(''); // Clear any existing error message
 
         try {
             // Update the URL to point to the deployed backend
-            const response = await axios.post(
+            await axios.post(
                 'https://pythonProject-Encryption-Backend.onrender.com/api/accounts/register/',
                 { username, email, password },
                 { headers: { 'Content-Type': 'application/json' } }
@@ -40,8 +42,12 @@ const Register = () => {
             resetForm(); // Reset the form fields
         } catch (error) {
             setLoading(false); // Hide the spinner if there's an error
-            console.error('There was an error registering!', error);
-            alert('Registration failed!');
+            // Extract error message from the server response
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.message || 'Registration failed!');
+            } else {
+                setErrorMessage('An unexpected error occurred!');
+            }
         }
         setSubmitting(false);
     };
@@ -88,6 +94,9 @@ const Register = () => {
                             className="auth-input"
                         />
                         <ErrorMessage name="password" component="div" className="error-message" />
+
+                        {/* Display error message */}
+                        {errorMessage && <p className="error-message">{errorMessage}</p>}
 
                         <button
                             type="submit"

@@ -104,7 +104,7 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated, encryptionKey }) => {
             <div className="navbar-container">
                 <Link to="/" className="navbar-logo">
                     <img src={logo} alt="Logo" className="logo-circle" />
-                    <span>Data Encryption and Decryption</span>
+                    <span>CryptoGuard</span>
                 </Link>
                 <ul className="navbar-menu">
                     <li className="navbar-item">
